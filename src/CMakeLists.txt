@@ -8,4 +8,5 @@ add_executable(RayTracingInOneWeekend
     HittableList.h
     MathUtils.h
     Interval.h
+    Camera.h
 )
