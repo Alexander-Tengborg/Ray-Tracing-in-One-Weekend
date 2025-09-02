@@ -3,4 +3,9 @@ add_executable(RayTracingInOneWeekend
     Vec3.h
     Color.h
     Ray.h
+    Hittable.h
+    Sphere.h
+    HittableList.h
+    MathUtils.h
+    Interval.h
 )
