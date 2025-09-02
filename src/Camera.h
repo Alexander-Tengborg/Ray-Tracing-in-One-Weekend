@@ -8,6 +8,7 @@ class Camera
 public:
     double aspect_ratio = 1.0;
     int image_width = 100;
+    int samples_per_pixel = 100;
 
     void render(const Hittable& world)
     {
@@ -20,14 +21,14 @@ public:
             std::clog << "\rProgess: " << static_cast<int>(100.0 * j/image_height_) << "%" << std::flush;
             for (int i = 0; i < image_width; i++)
             {
-                auto pixel_center = pixel00_loc_ + (i * pixel_delta_u_) + (j * pixel_delta_v_);
-                auto ray_direction = pixel_center - center_;
+                Color pixel_color(0.0, 0.0, 0.0);
+                for (int sample = 0; sample < samples_per_pixel; sample++)
+                {
+                    auto r = getRay(i, j);
+                    pixel_color += rayColor(r, world);
+                }
 
-                Ray ray(center_, ray_direction);
-
-                auto pixelColor = rayColor(ray, world);
-
-                writeColor(std::cout, pixelColor);
+                writeColor(std::cout, pixel_samples_scale_ * pixel_color);
             }
         }
 
@@ -36,6 +37,7 @@ public:
 
 private:
     int image_height_;
+    double pixel_samples_scale_;
     Point3 center_;
     Point3 pixel00_loc_;
     Vec3 pixel_delta_u_;
@@ -45,6 +47,8 @@ private:
     {
         image_height_ = static_cast<int>(image_width / aspect_ratio);
         image_height_ = (image_height_ < 1) ? 1 : image_height_;
+
+        pixel_samples_scale_ = 1.0 / samples_per_pixel;
 
         auto center = Point3(0, 0, 0);
 
@@ -65,6 +69,22 @@ private:
         auto viewport_upper_left = center_ - Vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
         pixel00_loc_ = viewport_upper_left + 0.5 * (pixel_delta_u_ + pixel_delta_v_);
 
+    }
+
+    Ray getRay(int i, int j) const
+    {
+        auto offset = sampleSquare();
+        auto pixel_sample = pixel00_loc_ + (i+offset.x)*pixel_delta_u_ + (j+offset.y)*pixel_delta_v_;
+
+        auto ray_origin = center_;
+        auto ray_direction = pixel_sample - ray_origin;
+        
+        return Ray(ray_origin, ray_direction);
+    }
+
+    Vec3 sampleSquare() const
+    {
+        return Vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
     Color rayColor(const Ray& r, const Hittable& world)
