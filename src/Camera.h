@@ -8,7 +8,8 @@ class Camera
 public:
     double aspect_ratio = 1.0;
     int image_width = 100;
-    int samples_per_pixel = 100;
+    int samples_per_pixel = 10;
+    int max_depth = 10;
 
     void render(const Hittable& world)
     {
@@ -25,7 +26,7 @@ public:
                 for (int sample = 0; sample < samples_per_pixel; sample++)
                 {
                     auto r = getRay(i, j);
-                    pixel_color += rayColor(r, world);
+                    pixel_color += rayColor(r, max_depth, world);
                 }
 
                 writeColor(std::cout, pixel_samples_scale_ * pixel_color);
@@ -84,14 +85,22 @@ private:
 
     Vec3 sampleSquare() const
     {
-        return Vec3(random_double() - 0.5, random_double() - 0.5, 0);
+        return Vec3(randomDouble() - 0.5, randomDouble() - 0.5, 0);
     }
 
-    Color rayColor(const Ray& r, const Hittable& world)
+    Color rayColor(const Ray& r, int depth, const Hittable& world)
     {
+        if (depth <= 0)
+            return Color(0.0, 0.0, 0.0);
+
         HitRecord rec;
-        if (world.hit(r, Interval(0, infinity), rec))
-            return 0.5*(rec.normal+Color(1, 1, 1));
+
+        // Uses 0.001 instead of 0 to get rid off "shadow acne"
+        if (world.hit(r, Interval(0.001, infinity), rec))
+        {
+            auto direction = rec.normal + randomUnitVector();
+            return 0.5*(rayColor(Ray(rec.p, direction), depth-1, world));
+        }
 
         auto unit_direction = unitVector(r.direction());
         auto a = 0.5*(unit_direction.y + 1.0);

@@ -1,9 +1,8 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-
-#include <cmath>
 #include <iostream>
+
+#include "MathUtils.h"
 
 class Vec3
 {
@@ -51,6 +50,16 @@ public:
     double lengthSquared() const
     {
         return x * x + y * y + z * z;
+    }
+
+    static Vec3 random()
+    {
+        return Vec3(randomDouble(), randomDouble(), randomDouble());
+    }
+
+    static Vec3 random(double min, double max)
+    {
+        return Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
     }
 };
 
@@ -106,4 +115,31 @@ inline Vec3 cross(const Vec3& u, const Vec3& v)
 inline Vec3 unitVector(const Vec3& v)
 {
     return v / v.length();
+}
+
+inline Vec3 randomUnitVector()
+{
+    while(true)
+    {
+        auto p = Vec3::random(-1, 1);
+        auto lensq = p.lengthSquared();
+
+        // If a double is too small it can underflow to 0, which may lead to vectors
+        // with components that have infinite values.
+        // Double safely supports values greater than 1e-160
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+inline Vec3 randomOnHemisphere(const Vec3& normal)
+{
+    Vec3 on_unit_sphere = randomUnitVector();
+
+    // If normal and the unit sphere are in the same hemisphere
+    if(dot(on_unit_sphere, normal) > 0.0)
+        return on_unit_sphere;
+
+    // If not, flip the unit sphere
+    return -on_unit_sphere;
 }

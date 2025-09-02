@@ -4,4 +4,4 @@ build/
 # VS Code settings
 .vscode/
 
-image.ppm
+*.ppm
