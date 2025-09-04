@@ -2,6 +2,7 @@
 
 #include "Hittable.h"
 #include "Color.h"
+#include "Material.h"
 
 class Camera
 {
@@ -98,8 +99,13 @@ private:
         // Uses 0.001 instead of 0 to get rid off "shadow acne"
         if (world.hit(r, Interval(0.001, infinity), rec))
         {
-            auto direction = rec.normal + randomUnitVector();
-            return 0.5*(rayColor(Ray(rec.p, direction), depth-1, world));
+            Color attenuation;
+            Ray scattered_ray;
+
+            if (rec.mat->scatter(r, rec, attenuation, scattered_ray))
+                return attenuation * rayColor(scattered_ray, depth-1, world);
+
+            return Color(0.0, 0.0, 0.0);
         }
 
         auto unit_direction = unitVector(r.direction());

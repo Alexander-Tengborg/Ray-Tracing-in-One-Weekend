@@ -52,6 +52,14 @@ public:
         return x * x + y * y + z * z;
     }
 
+    bool near_zero() const
+    {
+        // Return true if the vector is close to zero in all dimensions.
+        auto s = 1e-8;
+
+        return (std::fabs(x) < s) && (std::fabs(y) < s) && (std::fabs(z) < s);
+    }
+
     static Vec3 random()
     {
         return Vec3(randomDouble(), randomDouble(), randomDouble());
@@ -142,4 +150,9 @@ inline Vec3 randomOnHemisphere(const Vec3& normal)
 
     // If not, flip the unit sphere
     return -on_unit_sphere;
+}
+
+inline Vec3 reflect(const Vec3& v, const Vec3& n)
+{
+    return v - 2*dot(v, n)*n;
 }
