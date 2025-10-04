@@ -43,13 +43,16 @@ int main()
     Camera camera;
     camera.aspect_ratio = 16.0 / 9.0;
     camera.image_width = 800;
-    camera.samples_per_pixel = 100;
+    camera.samples_per_pixel = 1000;
     camera.max_depth = 500;
 
     camera.vfov = 20;
     camera.look_from = Point3(-2, 2, 1);
     camera.look_at = Point3(-0, 0, -1);
     camera.v_up = Vec3(0, 1, 0);
+
+    // camera.defocus_angle = 10.0;
+    // camera.focus_dist = 3.4;
 
     camera.render(world);
 
